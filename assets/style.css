@@ -8,11 +8,28 @@ html {
 
 body {
     width: 100%;
+    max-width: 1500px;
     font-family: 'Roboto', sans-serif;
     margin: 3% auto;
     background-color: rgb(245, 245, 245);
 }
 
+/* || header layout */
+header h1 {
+    text-align: left;
+}
+
+header h2 {
+    margin-top: -1.5rem;
+}
+
+header h2:after {
+    content: "";
+    display: block;
+    width: 75%;
+    padding-top: 1rem;
+    border-bottom: 0.13rem solid #4285f4;
+}
 
 /* For Mobile */
 @media screen and (max-width: 540px) {
@@ -54,7 +71,6 @@ h1 {
 h2 {
     font-size: 2.441rem;
     color: #616161;
-    border-bottom: 2px solid #375e97;
 }
 
 h3 {
@@ -94,15 +110,6 @@ q {
     font-style: italic;
 }
 
-
-/* || header layout */
-
-header {
-    display: flex;
-    flex-flow: row wrap;
-    text-align: center;
-}
-
 @media screen and (max-width: 540px) {
     nav a,
     nav span {
@@ -127,6 +134,10 @@ header {
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
+.panel:hover {
+    box-shadow: rgba(66, 133, 244, 0.2) 0px 7px 29px 0px;
+}
+
 #quick-stats {
     height: fit-content;
     grid-column: 1;
@@ -141,7 +152,7 @@ header {
 }
 
 #progress-gauge {
-    margin-top: -0.5em;
+    margin-top: -1.0em;
 }
 
 #numerical-stats {
@@ -149,7 +160,7 @@ header {
 
 .numerical-stat {
     display: block;
-    padding: 0.3em;
+    padding: 0.75em;
 }
 
 #plan-vs-actual {

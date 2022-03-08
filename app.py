@@ -25,11 +25,10 @@ actual = pd.DataFrame({
 
 
 def build_banner():
-  return html.Header(
-      id='header',
-      children=[
-          html.H1(datetime.datetime.now().strftime("%B") + ' Finance Dashboard')
-      ])
+  return html.Header(children=[
+      html.H1('Yarden\'s Finance Dashboard'),
+      html.H2(datetime.datetime.now().strftime("%d, %b %Y"))
+  ])
 
 
 def build_quick_stats_panel():
@@ -41,12 +40,6 @@ def build_quick_stats_panel():
           html.Div(
               id='stats',
               children=[
-                  daq.Gauge(
-                      id="progress-gauge",
-                      size=100,
-                      value=(23 / 123) * 100.0,
-                      max=100,
-                      min=0),
                   html.Div(
                       id='numerical-stats',
                       children=[
@@ -56,7 +49,13 @@ def build_quick_stats_panel():
                           html.Span(
                               'Planned income: {}'.format(123),
                               className='numerical-stat')
-                      ])
+                      ]),
+                  daq.Gauge(
+                      id="progress-gauge",
+                      size=100,
+                      value=(23 / 123) * 100.0,
+                      max=100,
+                      min=0)
               ])
       ])
 
