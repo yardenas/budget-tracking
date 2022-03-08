@@ -1,0 +1,134 @@
+/* || General setup */
+
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,bold");
+
+
+html {
+}
+
+body {
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    margin: 3% auto;
+    background-color: rgb(245, 245, 245);
+}
+
+
+/* For Mobile */
+@media screen and (max-width: 540px) {
+    html {
+        font-size: 10px;
+    }
+    body {
+        width: 100%;
+        font-size: 5px;
+        min-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+/* For Tablets */
+@media screen and (min-width: 540px) and (max-width: 780px) {
+    body {
+        width: 100%;
+        min-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+
+
+/* || typography */
+
+h1,
+h2,
+h3 {
+    font-style: normal;
+    font-weight: normal;
+    color: #202729;
+}
+
+h1 {
+    font-size: 3.052rem;
+    text-align: center;
+}
+
+h2 {
+    font-size: 2.441rem;
+    color: #616161;
+    border-bottom: 2px solid #375e97;
+}
+
+h3 {
+    font-size: 1.953rem;
+    color: #424242;
+}
+
+p,
+li {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    font-weight: 300;
+}
+
+p a {
+    color: #375e97
+}
+
+p a:link {
+    text-decoration: none;
+}
+
+p a:visited {
+    color: #375e97
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+q {
+    font-style: italic;
+}
+
+
+/* || header layout */
+
+header {
+    display: flex;
+    flex-flow: row wrap;
+    text-align: center;
+}
+
+@media screen and (max-width: 540px) {
+    nav a,
+    nav span {
+        font-size: 1.8rem;
+        padding: 0.3rem;
+    }
+}
+
+
+/* || panels */
+.panels {
+    display: grid;
+    margin: 1%;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-gap: 10px;
+}
+
+.panel {
+    width: auto;
+    background-color: rgb(255, 255, 255);
+    border-radius: 5%;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+
+.panel .figure, h3 {
+  margin: 2.5%;
+}
+
+@media screen and (max-width: 540px) {
+}
