@@ -2,7 +2,7 @@ import datetime
 
 import dash_daq as daq
 import pandas as pd
-from dash import Dash, html
+from dash import Dash, html, dcc
 
 import figures as figs
 
@@ -38,7 +38,7 @@ def build_quick_stats_panel():
       children=[
           html.H3('Monthly Balance: {}'.format(23)),
           html.Div(
-              id='stats',
+              className='stats',
               children=[
                   html.Div(
                       id='numerical-stats',
@@ -60,14 +60,42 @@ def build_quick_stats_panel():
       ])
 
 
+def build_budgetary_item_stats_panel():
+  return html.Div(
+      id='item-quick-stats',
+      className='panel',
+      children=[
+          html.H4('Budgetary Item Planned vs. Actual'),
+          html.Div(
+              className='stats',
+              children=[
+                  html.Div(
+                      id='item-numerical-stats',
+                      children=[
+                          html.Span(
+                              'Already spent: {}'.format(100),
+                              className='numerical-stat'),
+                          html.Span(
+                              'Planned income: {}'.format(123),
+                              className='numerical-stat'),
+                          dcc.Dropdown(budget['items'], budget['items'].iloc[0])
+                      ]),
+                  daq.Gauge(
+                      id="item-progress-gauge",
+                      size=100,
+                      value=(23 / 123) * 100.0,
+                      max=100,
+                      min=0)
+              ])
+      ])
+
+
 def build_plan_vs_actual_panel():
   return html.Div(
       id='plan-vs-actual',
       className='panel',
-      children=[
-          html.H4('Budgetary Items Planned vs. Actual'),
-          figs.plan_vs_actual_fig(budget)
-      ])
+      children=[html.H4('Planned vs. Actual'),
+                figs.plan_vs_actual_fig(budget)])
 
 
 def build_piechart():
@@ -88,6 +116,7 @@ app.layout = html.Div(
             className='panels',
             children=[
                 build_quick_stats_panel(),
+                build_budgetary_item_stats_panel(),
                 build_plan_vs_actual_panel(),
                 build_piechart()
             ])

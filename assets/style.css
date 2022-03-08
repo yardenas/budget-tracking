@@ -123,7 +123,8 @@ q {
 .panels {
     display: grid;
     margin: 1%;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-rows: 1fr 2fr 2fr;
     grid-gap: 10px;
 }
 
@@ -139,23 +140,24 @@ q {
 }
 
 #quick-stats {
-    height: fit-content;
     grid-column: 1;
     grid-row: 1;
 }
 
+#item-quick-stats {
+    grid-column: 2;
+    grid-row: 1;
+}
 
-#stats {
+
+.stats {
     display: flex;
     justify-content: flex-start;
     align-items: top;
 }
 
-#progress-gauge {
-    margin-top: -1.0em;
-}
-
-#numerical-stats {
+#item-progress-gauge {
+    margin-top: 1.75em;
 }
 
 .numerical-stat {
@@ -164,12 +166,12 @@ q {
 }
 
 #plan-vs-actual {
-    grid-column: 1;
+    grid-column: span 2;
     grid-row: 2;
 }
 
 #piechart-panel {
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 2;
 }
 
