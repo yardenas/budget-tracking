@@ -40,9 +40,7 @@ body {
 
 /* || typography */
 
-h1,
-h2,
-h3 {
+h1, h2, h3, h4, h5, h6{
     font-style: normal;
     font-weight: normal;
     color: #202729;
@@ -62,6 +60,11 @@ h2 {
 h3 {
     font-size: 1.953rem;
     color: #424242;
+}
+
+h4 {
+    font-weight: 300;
+    color: #202729;
 }
 
 p,
@@ -125,9 +128,29 @@ header {
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
+#quick-stats {
+    height: 10%;
+    margin: 1%;
 
-.panel .figure, h3 {
-  margin: 2.5%;
+}
+
+#stats {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#progress-gauge {
+}
+
+#income-stat {
+}
+
+#spent-stat {
+}
+
+
+.panel > * {
+  margin: 3.0%;
 }
 
 @media screen and (max-width: 540px) {

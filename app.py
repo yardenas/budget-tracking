@@ -37,13 +37,19 @@ def build_quick_stats_panel():
       id='quick-stats',
       className='panel',
       children=[
-          html.Div(id='monthly-balance', children=[html.P('Monthly Balance')]),
-          daq.Gauge(
-              id="progress-gauge",
-              max=300,
-              min=0,
-              showCurrentValue=True,  # default size 200 pixel
-          )
+          html.H3('Monthly Balance: {}'.format(23)),
+          html.Div(
+              id='stats',
+              children=[
+                  daq.Gauge(
+                      id="progress-gauge",
+                      size=100,
+                      value=(23 / 123) * 100.0,
+                      max=100,
+                      min=0),
+                  html.Span('Already spent: {}'.format(100), id='spent-stat'),
+                  html.Span('Planned income: {}'.format(123), id='income-stat')
+              ])
       ])
 
 
@@ -52,7 +58,7 @@ def build_plan_vs_actual_panel():
       id='plan-vs-actual',
       className='panel',
       children=[
-          html.H3('Budgetary Items Planned vs. Actual'),
+          html.H4('Budgetary Items Planned vs. Actual'),
           figs.plan_vs_actual_fig(budget)
       ])
 
@@ -62,7 +68,7 @@ def build_piechart():
       id='piechart-panel',
       className='panel',
       children=[
-          html.H3('Budgetary Items Distribution'),
+          html.H4('Budgetary Items Distribution'),
           figs.piechart(budget['items'], budget['amounts'])
       ])
 
@@ -71,6 +77,7 @@ app.layout = html.Div(
     id='app-container',
     children=[
         build_banner(),
+        build_quick_stats_panel(),
         html.Div(
             className='panels',
             children=[build_plan_vs_actual_panel(),
