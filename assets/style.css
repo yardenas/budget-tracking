@@ -117,37 +117,50 @@ header {
     display: grid;
     margin: 1%;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
     grid-gap: 10px;
 }
 
 .panel {
     width: auto;
     background-color: rgb(255, 255, 255);
-    border-radius: 5%;
+    border-radius: 0.5em;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 #quick-stats {
-    height: 10%;
-    margin: 1%;
-
+    height: fit-content;
+    grid-column: 1;
+    grid-row: 1;
 }
+
 
 #stats {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-start;
+    align-items: top;
 }
 
 #progress-gauge {
+    margin-top: -0.5em;
 }
 
-#income-stat {
+#numerical-stats {
 }
 
-#spent-stat {
+.numerical-stat {
+    display: block;
+    padding: 0.3em;
 }
 
+#plan-vs-actual {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+#piechart-panel {
+    grid-column: 2;
+    grid-row: 2;
+}
 
 .panel > * {
   margin: 3.0%;

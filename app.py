@@ -47,8 +47,16 @@ def build_quick_stats_panel():
                       value=(23 / 123) * 100.0,
                       max=100,
                       min=0),
-                  html.Span('Already spent: {}'.format(100), id='spent-stat'),
-                  html.Span('Planned income: {}'.format(123), id='income-stat')
+                  html.Div(
+                      id='numerical-stats',
+                      children=[
+                          html.Span(
+                              'Already spent: {}'.format(100),
+                              className='numerical-stat'),
+                          html.Span(
+                              'Planned income: {}'.format(123),
+                              className='numerical-stat')
+                      ])
               ])
       ])
 
@@ -77,11 +85,13 @@ app.layout = html.Div(
     id='app-container',
     children=[
         build_banner(),
-        build_quick_stats_panel(),
         html.Div(
             className='panels',
-            children=[build_plan_vs_actual_panel(),
-                      build_piechart()])
+            children=[
+                build_quick_stats_panel(),
+                build_plan_vs_actual_panel(),
+                build_piechart()
+            ])
     ])
 
 if __name__ == '__main__':
