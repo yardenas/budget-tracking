@@ -55,7 +55,8 @@ def build_quick_stats_panel():
                       size=100,
                       value=(23 / 123) * 100.0,
                       max=100,
-                      min=0)
+                      min=0,
+                      showCurrentValue=True)
               ])
       ])
 
@@ -66,6 +67,7 @@ def build_budgetary_item_stats_panel():
       className='panel',
       children=[
           html.H4('Budgetary Item Planned vs. Actual'),
+          dcc.Dropdown(budget['items'], budget['items'].iloc[0], id='dropdown'),
           html.Div(
               className='stats',
               children=[
@@ -78,14 +80,14 @@ def build_budgetary_item_stats_panel():
                           html.Span(
                               'Planned income: {}'.format(123),
                               className='numerical-stat'),
-                          dcc.Dropdown(budget['items'], budget['items'].iloc[0])
                       ]),
                   daq.Gauge(
                       id="item-progress-gauge",
                       size=100,
                       value=(23 / 123) * 100.0,
                       max=100,
-                      min=0)
+                      min=0,
+                      showCurrentValue=True)
               ])
       ])
 

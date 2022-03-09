@@ -12,5 +12,5 @@ def plan_vs_actual_fig(budget):
 def piechart(names, values):
   return dcc.Graph(
       id='piechart',
-      figure=px.pie(names=names, values=values),
+      figure=px.pie(names=names, values=values, hole=.3),
       className='figure')
