@@ -2,7 +2,7 @@ import datetime
 
 import dash_daq as daq
 import pandas as pd
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, dash_table
 
 import figures as figs
 
@@ -22,6 +22,8 @@ actual = pd.DataFrame({
     'description': pd.Series(dtype=str),
     'category': pd.Series(dtype=str)
 })
+
+actual = actual.set_index('date')
 
 
 def build_banner():
@@ -110,6 +112,66 @@ def build_piechart():
       ])
 
 
+def build_timeseries():
+  return html.Div(
+      id='timeseries',
+      className='panel',
+      children=[
+          html.H4('Planned vs. Actual Through Time'),
+          figs.plan_vs_actual_time_series(budget, actual)
+      ])
+
+
+def build_budget_table():
+  return html.Div(
+      className='panel',
+      id='budget-table',
+      children=[
+          html.H4('Budget'),
+          html.Div([
+              dcc.Input(
+                  className='adding-rows-name',
+                  placeholder='Enter a column name...',
+                  value=''),
+              html.Button(
+                  'Add Column', className='adding-rows-button', n_clicks=0)
+          ]),
+          dash_table.DataTable(
+              budget.to_dict('records'), [{
+                  "name": i.capitalize(),
+                  "id": i
+              } for i in budget.columns],
+              editable=True,
+              row_deletable=True),
+          html.Button('Add Row', className='editing-rows-button', n_clicks=0)
+      ])
+
+
+def build_actual_table():
+  return html.Div(
+      className='panel',
+      id='actual-table',
+      children=[
+          html.H4('Actual'),
+          html.Div([
+              dcc.Input(
+                  className='adding-rows-name',
+                  placeholder='Enter a column name...',
+                  value=''),
+              html.Button(
+                  'Add Column', className='adding-rows-button', n_clicks=0)
+          ]),
+          dash_table.DataTable(
+              budget.to_dict('records'), [{
+                  "name": i.capitalize(),
+                  "id": i
+              } for i in budget.columns],
+              editable=True,
+              row_deletable=True),
+          html.Button('Add Row', className='editing-rows-button', n_clicks=0)
+      ])
+
+
 app.layout = html.Div(
     id='app-container',
     children=[
@@ -118,9 +180,12 @@ app.layout = html.Div(
             className='panels',
             children=[
                 build_quick_stats_panel(),
+                build_timeseries(),
                 build_budgetary_item_stats_panel(),
                 build_plan_vs_actual_panel(),
-                build_piechart()
+                build_piechart(),
+                build_budget_table(),
+                build_actual_table()
             ])
     ])
 
