@@ -3,6 +3,7 @@ import datetime
 import dash_daq as daq
 import pandas as pd
 from dash import Dash, html, dcc, dash_table
+from dash.dependencies import Input, Output
 
 import figures as figs
 
@@ -16,14 +17,14 @@ budget = pd.DataFrame({
     'amounts': list(range(7))
 })
 
-actual = pd.DataFrame({
-    'date': pd.Series(dtype='datetime64[ns]'),
-    'amount': pd.Series(dtype=float),
-    'description': pd.Series(dtype=str),
-    'category': pd.Series(dtype=str)
-})
-
-actual = actual.set_index('date')
+actual = pd.DataFrame(
+    {
+        'date': datetime.datetime.now(),
+        'amount': 0.0,
+        'description': '',
+        'category': ''
+    },
+    index=[0])
 
 
 def build_banner():
@@ -38,7 +39,8 @@ def build_quick_stats_panel():
       id='quick-stats',
       className='panel',
       children=[
-          html.H3('Monthly Balance: {}'.format(23)),
+          html.H3('Monthly Balance: {}'.format(23),
+                  id='quick-stats-total'),
           html.Div(
               className='stats',
               children=[
@@ -46,11 +48,13 @@ def build_quick_stats_panel():
                       id='numerical-stats',
                       children=[
                           html.Span(
-                              'Already spent: {}'.format(100),
-                              className='numerical-stat'),
+                              children='Already spent: {}'.format(100),
+                              className='numerical-stat',
+                              id='quick-stats-planned'),
                           html.Span(
-                              'Planned income: {}'.format(123),
-                              className='numerical-stat')
+                              children='Planned revenue: {}'.format(123),
+                              className='numerical-stat',
+                              id='quick-stats-income')
                       ]),
                   daq.Gauge(
                       id="progress-gauge",
@@ -78,10 +82,12 @@ def build_budgetary_item_stats_panel():
                       children=[
                           html.Span(
                               'Already spent: {}'.format(100),
-                              className='numerical-stat'),
+                              className='numerical-stat',
+                              id='item-stats-planned'),
                           html.Span(
                               'Planned income: {}'.format(123),
-                              className='numerical-stat'),
+                              className='numerical-stat',
+                              id='item-stats-income'),
                       ]),
                   daq.Gauge(
                       id="item-progress-gauge",
@@ -142,7 +148,8 @@ def build_budget_table():
                   "id": i
               } for i in budget.columns],
               editable=True,
-              row_deletable=True),
+              row_deletable=True,
+              id='budget-data-table'),
           html.Button('Add Row', className='editing-rows-button', n_clicks=0)
       ])
 
@@ -162,14 +169,50 @@ def build_actual_table():
                   'Add Column', className='adding-rows-button', n_clicks=0)
           ]),
           dash_table.DataTable(
-              budget.to_dict('records'), [{
+              actual.to_dict('records'), [{
                   "name": i.capitalize(),
                   "id": i
-              } for i in budget.columns],
+              } for i in actual.columns],
               editable=True,
-              row_deletable=True),
+              row_deletable=True,
+              id='actual-data-table'),
           html.Button('Add Row', className='editing-rows-button', n_clicks=0)
       ])
+
+
+@app.callback([
+    Output('progress-gauge', 'value'),
+    Output('quick-stats-income', 'children'),
+    Output('quick-stats-planned', 'children'),
+    Output('quick-stats-total', 'children')
+], [Input('actual-data-table', 'data'),
+    Input('budget-data-table', 'data')])
+def update_stats_panel(actual_data, budget_data):
+  planned_total = pd.DataFrame(budget_data)['amounts'].sum()
+  actual_total = pd.DataFrame(actual_data)['amount'].sum()
+  return (actual_total / planned_total * 100.0,
+          'Planned income: {}'.format(planned_total),
+          'Already spent: {}'.format(actual_total),
+          'Monthly Balance: {}'.format(planned_total - actual_total))
+
+
+@app.callback([
+    Output('item-progress-gauge', 'value'),
+    Output('item-stats-income', 'children'),
+    Output('item-stats-planned', 'children')
+], [
+    Input('actual-data-table', 'data'),
+    Input('budget-data-table', 'data'),
+    Input('dropdown', 'value')
+])
+def update_budgetary_item_stats_panel(actual_data, budget_data, item):
+  budget_data = pd.DataFrame(budget_data)
+  actual_data = pd.DataFrame(actual_data)
+  planned_total = budget_data[budget_data['items'] == item]['amounts'].sum()
+  actual_total = actual_data[actual_data['category'] == item]['amount'].sum()
+  return (actual_total / planned_total * 100.0,
+          'Planned income: {}'.format(planned_total),
+          'Already spent: {}'.format(actual_total))
 
 
 app.layout = html.Div(

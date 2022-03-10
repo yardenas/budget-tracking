@@ -19,6 +19,7 @@ def piechart(names, values):
 def plan_vs_actual_time_series(budget, actual):
   if budget.empty or actual.empty:
     return html.P('No Data', id='no-data-error')
+  actual = actual.set_index('date')
   return dcc.Graph(
       id='plan-vs-actual-time',
       figure=px.line(
