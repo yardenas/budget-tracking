@@ -17,10 +17,12 @@ body {
 /* || header layout */
 header h1 {
     text-align: left;
+    margin: 0.5em;
 }
 
 header h2 {
     margin-top: -1.5rem;
+    margin: 0.5em;
 }
 
 header h2:after {
@@ -128,6 +130,7 @@ q {
     grid-gap: 10px;
 }
 
+
 .panel {
     width: auto;
     background-color: rgb(255, 255, 255);
@@ -160,21 +163,6 @@ q {
     grid-row 1;
 }
 
-.stats {
-    display: flex;
-    justify-content: flex-start;
-    align-items: top;
-}
-
-#progress-gauge {
-    margin-top: 0.3em;
-}
-
-.numerical-stat {
-    display: block;
-    padding: 0.75em;
-}
-
 #plan-vs-actual {
     grid-column: span 2;
     grid-row: 2;
@@ -185,6 +173,33 @@ q {
     grid-row: 2;
 }
 
+#budget-table {
+    grid-column: span 2;
+    grid-row: 3;
+}
+
+#actual-table {
+    grid-column: 3;
+    grid-row: 3;
+}
+
+.stats {
+    display: flex;
+    justify-content: flex-start;
+    align-items: top;
+}
+
+position: absolute;
+                bottom: 0;
+
+#progress-gauge {
+    margin-top: 0.3em;
+}
+
+.numerical-stat {
+    display: block;
+    padding: 0.75em;
+}
 
 .needle-knob, .scale, .needle {
   display: none !important;
@@ -197,16 +212,6 @@ q {
 
 #item-progress-gauge > div > div > div > div {
   color: #202729; !important;
-}
-
-#budget-table {
-    grid-column: span 2;
-    grid-row: 3;
-}
-
-#actual-table {
-    grid-column: 3;
-    grid-row: 3;
 }
 
 #no-data-error {

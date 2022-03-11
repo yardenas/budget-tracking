@@ -14,7 +14,7 @@ budget = pd.DataFrame({
         'House', 'Health', 'Groceries', 'Transportation', 'Investing', 'Income',
         'Travel'
     ],
-    'amounts': [0.0] * 7
+    'amounts': list(range(7))
 })
 
 actual = pd.DataFrame(
@@ -57,7 +57,7 @@ def build_quick_stats_panel():
                       ]),
                   daq.Gauge(
                       id="progress-gauge",
-                      size=100,
+                      size=80,
                       value=0.0,
                       max=1.0,
                       min=0.0,
@@ -90,7 +90,7 @@ def build_budgetary_item_stats_panel():
                       ]),
                   daq.Gauge(
                       id="item-progress-gauge",
-                      size=100,
+                      size=80,
                       value=0.0,
                       max=1.0,
                       min=0.0,
@@ -241,8 +241,8 @@ app.layout = html.Div(
             className='panels',
             children=[
                 build_quick_stats_panel(),
-                build_timeseries(),
                 build_budgetary_item_stats_panel(),
+                build_timeseries(),
                 build_plan_vs_actual_panel(),
                 build_piechart(),
                 build_budget_table(),
