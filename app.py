@@ -19,7 +19,7 @@ budget = pd.DataFrame({
 
 actual = pd.DataFrame(
     {
-        'date': datetime.datetime.now(),
+        'date': datetime.datetime.today().strftime('%Y-%m-%d'),
         'amount': 0.0,
         'description': '',
         'category': ''

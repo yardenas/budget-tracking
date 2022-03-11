@@ -24,5 +24,5 @@ def plan_vs_actual_time_series(budget, actual):
       id='plan-vs-actual-time',
       figure=px.line(
           x=actual.index,
-          y=actual['amount'].rolling('1D').sum() / budget['amounts'].sum()),
+          y=actual['amount'].cumsum() / budget['amounts'].sum()),
   )
