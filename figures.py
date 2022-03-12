@@ -1,9 +1,15 @@
+import pandas as pd
 import plotly.express as px
-from dash import dcc
 
 
 def plan_vs_actual_fig(budget, actual):
-  return px.bar(budget, x='items', y='amounts')
+  actual_sum_by_category = actual.groupby('category')['amount'].sum()
+  actual_sum_by_category = pd.DataFrame(
+      actual_sum_by_category.rename('amounts'))
+  actual_sum_by_category['source'] = 'actual'
+  budget['source'] = 'budget'
+  df = pd.concat([budget.set_index('items'), actual_sum_by_category])
+  return px.bar(df, x=df.index, y='amounts', color='source', barmode="overlay")
 
 
 def piechart(names, values):
