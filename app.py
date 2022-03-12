@@ -21,7 +21,7 @@ actual = pd.DataFrame(
     {
         'date': datetime.datetime.today().strftime('%Y-%m-%d'),
         'amount': 0.0,
-        'description': '',
+        'description': 'Add description...',
         'category': ''
     },
     index=[0])
@@ -39,7 +39,7 @@ def build_quick_stats_panel():
       id='quick-stats',
       className='panel',
       children=[
-          html.H3('Monthly Balance: {}'.format(0.0), id='quick-stats-total'),
+          html.H4('Bottom Line'),
           html.Div(
               className='stats',
               children=[
@@ -62,7 +62,8 @@ def build_quick_stats_panel():
                       max=1.0,
                       min=0.0,
                       showCurrentValue=True)
-              ])
+              ]),
+          html.H3('Monthly Balance: {}'.format(0.0), id='quick-stats-total'),
       ])
 
 
@@ -71,8 +72,7 @@ def build_budgetary_item_stats_panel():
       id='item-quick-stats',
       className='panel',
       children=[
-          html.H4('Budgetary Item Planned vs. Actual'),
-          dcc.Dropdown(budget['items'], budget['items'].iloc[0], id='dropdown'),
+          html.H4('Bottom Line per Item'),
           html.Div(
               className='stats',
               children=[
@@ -95,7 +95,8 @@ def build_budgetary_item_stats_panel():
                       max=1.0,
                       min=0.0,
                       showCurrentValue=True)
-              ])
+              ]),
+          dcc.Dropdown(budget['items'], budget['items'].iloc[0], id='dropdown')
       ])
 
 
@@ -103,8 +104,13 @@ def build_plan_vs_actual_panel():
   return html.Div(
       id='plan-vs-actual',
       className='panel',
-      children=[html.H4('Planned vs. Actual'),
-                figs.plan_vs_actual_fig(budget)])
+      children=[
+          html.H4('Planned vs. Actual'),
+          dcc.Graph(
+              id='plan-vs-actual-all-budgetary-items',
+              figure=figs.plan_vs_actual_fig(budget, actual),
+              className='figure')
+      ])
 
 
 def build_piechart():
@@ -113,7 +119,7 @@ def build_piechart():
       className='panel',
       children=[
           html.H4('Budgetary Items Distribution'),
-          figs.piechart(budget['items'], budget['amounts'])
+          dcc.Graph(id='piechart', className='figure')
       ])
 
 
@@ -123,7 +129,9 @@ def build_timeseries():
       className='panel',
       children=[
           html.H4('Planned vs. Actual Through Time'),
-          figs.plan_vs_actual_time_series(budget, actual)
+          dcc.Graph(
+              id='plan-vs-actual-time',
+              figure=figs.plan_vs_actual_time_series(budget, actual))
       ])
 
 
@@ -143,9 +151,14 @@ def build_budget_table():
           ]),
           dash_table.DataTable(
               budget.to_dict('records'), [{
-                  "name": i.capitalize(),
-                  "id": i
-              } for i in budget.columns],
+                  'name': 'Items',
+                  'id': 'items',
+                  'type': 'text'
+              }, {
+                  'name': 'Amount',
+                  'id': 'amounts',
+                  'type': 'numeric'
+              }],
               editable=True,
               row_deletable=True,
               id='budget-data-table'),
@@ -231,6 +244,32 @@ def update_budgetary_item_stats_panel(actual_data, budget_data, item):
   return (actual_total, planned_total or
           planned_total + 1.0, 'Planned income: {}'.format(planned_total),
           'Already spent: {}'.format(actual_total))
+
+
+@app.callback(Output('piechart', 'figure'), Input('budget-data-table', 'data'))
+def update_piechart(budget_data):
+  budget_data = pd.DataFrame(budget_data)
+  return figs.piechart(budget_data['items'], budget_data['amounts'])
+
+
+@app.callback(
+    Output('plan-vs-actual-all-budgetary-items', 'figure'),
+    [Input('actual-data-table', 'data'),
+     Input('budget-data-table', 'data')])
+def update_timeseries(actual_data, budget_data):
+  budget_data = pd.DataFrame(budget_data)
+  actual_data = pd.DataFrame(actual_data)
+  return figs.plan_vs_actual_fig(budget_data, actual_data)
+
+
+@app.callback(
+    Output('plan-vs-actual-time', 'figure'),
+    [Input('actual-data-table', 'data'),
+     Input('budget-data-table', 'data')])
+def update_timeseries(actual_data, budget_data):
+  budget_data = pd.DataFrame(budget_data)
+  actual_data = pd.DataFrame(actual_data)
+  return figs.plan_vs_actual_time_series(budget_data, actual_data)
 
 
 app.layout = html.Div(
