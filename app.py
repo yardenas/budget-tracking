@@ -3,28 +3,31 @@ import datetime
 import dash_daq as daq
 import pandas as pd
 from dash import Dash, html, dcc, dash_table
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 
 import figures as figs
 
 app = Dash(__name__, title='Financial Planning and Monitoring')
 
-budget = pd.DataFrame({
-    'items': [
-        'House', 'Health', 'Groceries', 'Transportation', 'Investing', 'Income',
-        'Travel'
-    ],
-    'amounts': list(range(7))
-})
 
-actual = pd.DataFrame(
-    {
-        'date': datetime.datetime.today().strftime('%Y-%m-%d'),
-        'amount': 0.0,
-        'description': 'Add description...',
-        'category': ''
-    },
-    index=[0])
+def init_tables():
+  budget = pd.DataFrame({
+      'items': [
+          'House', 'Health', 'Groceries', 'Transportation', 'Investing',
+          'Income', 'Travel'
+      ],
+      'amounts': list(range(7))
+  })
+  actual = pd.DataFrame(
+      {
+          'date': [datetime.datetime.today().strftime('%Y-%m-%d')],
+          'amount': [0.0],
+          'description': ['Add description...'],
+          'category': ['']
+      },
+      index=[0])
+  return budget, actual
 
 
 def build_banner():
@@ -68,6 +71,7 @@ def build_quick_stats_panel():
 
 
 def build_budgetary_item_stats_panel():
+  budget, _ = init_tables()
   return html.Div(
       id='item-quick-stats',
       className='panel',
@@ -101,6 +105,7 @@ def build_budgetary_item_stats_panel():
 
 
 def build_plan_vs_actual_panel():
+  budget, actual = init_tables()
   return html.Div(
       id='plan-vs-actual',
       className='panel',
@@ -124,6 +129,7 @@ def build_piechart():
 
 
 def build_timeseries():
+  budget, actual = init_tables()
   return html.Div(
       id='timeseries',
       className='panel',
@@ -136,6 +142,7 @@ def build_timeseries():
 
 
 def build_budget_table():
+  budget, _ = init_tables()
   return html.Div(
       className='panel',
       id='budget-table',
@@ -167,6 +174,7 @@ def build_budget_table():
 
 
 def build_actual_table():
+  _, actual = init_tables()
   return html.Div(
       className='panel',
       id='actual-table',
@@ -272,6 +280,32 @@ def update_timeseries(actual_data, budget_data):
   return figs.plan_vs_actual_time_series(budget_data, actual_data)
 
 
+@app.callback(
+    Output('local-storage', 'data'),
+    [Input('budget-data-table', 'data'),
+     Input('actual-data-table', 'data')], State('local-storage', 'data'))
+def update_cache(budget_table_data, actual_table_date, storage):
+  if storage is None:
+    budget, actual = init_tables()
+    data = {'budget': budget.to_dict(), 'actual': actual.to_dict()}
+  else:
+    data = storage
+  data['budget'] = budget_table_data
+  data['actual'] = actual_table_date
+  return data
+
+
+@app.callback(
+    [Output('budget-data-table', 'data'),
+     Output('actual-data-table', 'data')],
+    Input('local-storage', 'modified_timestamp'), State('local-storage',
+                                                        'data'))
+def on_data_set_table(ts, storage):
+  if ts is None or storage is None:
+    raise PreventUpdate
+  return storage['budget'], storage['actual']
+
+
 app.layout = html.Div(
     id='app-container',
     children=[
@@ -279,13 +313,15 @@ app.layout = html.Div(
         html.Div(
             className='panels',
             children=[
+                dcc.Store(id='local-storage', storage_type='local'),
                 build_quick_stats_panel(),
                 build_budgetary_item_stats_panel(),
                 build_timeseries(),
                 build_plan_vs_actual_panel(),
                 build_piechart(),
                 build_budget_table(),
-                build_actual_table()
+                build_actual_table(),
+                html.Div(id='dummy-div', style={'display': 'none'})
             ])
     ])
 
