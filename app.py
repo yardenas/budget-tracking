@@ -88,7 +88,7 @@ def build_budgetary_item_stats_panel():
                               className='numerical-stat',
                               id='item-stats-planned'),
                           html.Span(
-                              'Planned income: {}'.format(0.0),
+                              'Planned amount: {}'.format(0.0),
                               className='numerical-stat',
                               id='item-stats-income'),
                       ]),
@@ -148,14 +148,6 @@ def build_budget_table():
       id='budget-table',
       children=[
           html.H4('Budget'),
-          html.Div([
-              dcc.Input(
-                  className='adding-rows-name',
-                  placeholder='Enter a column name...',
-                  value=''),
-              html.Button(
-                  'Add Column', className='adding-rows-button', n_clicks=0)
-          ]),
           dash_table.DataTable(
               budget.to_dict('records'), [{
                   'name': 'Items',
@@ -164,7 +156,7 @@ def build_budget_table():
               }, {
                   'name': 'Amount',
                   'id': 'amounts',
-                  'type': 'numeric'
+                  'type': 'numeric',
               }],
               editable=True,
               row_deletable=True,
@@ -174,20 +166,12 @@ def build_budget_table():
 
 
 def build_actual_table():
-  _, actual = init_tables()
+  budget, actual = init_tables()
   return html.Div(
       className='panel',
       id='actual-table',
       children=[
           html.H4('Actual'),
-          html.Div([
-              dcc.Input(
-                  className='adding-rows-name',
-                  placeholder='Enter a column name...',
-                  value=''),
-              html.Button(
-                  'Add Column', className='adding-rows-button', n_clicks=0)
-          ]),
           dash_table.DataTable(
               actual.to_dict('records'), [{
                   'name': 'Date',
@@ -204,13 +188,51 @@ def build_actual_table():
               }, {
                   'name': 'Category',
                   'id': 'category',
-                  'type': 'text'
+                  'type': 'text',
+                  'presentation': 'dropdown'
               }],
               editable=True,
               row_deletable=True,
+              dropdown={
+                  'category': {
+                      'options': [{
+                          'label': i,
+                          'value': i
+                      } for i in budget['items'].unique()]
+                  }
+              },
+              style_cell={
+                  'overflow': 'hidden',
+                  'textOverflow': 'ellipsis',
+                  'maxWidth': 0,
+              },
+              tooltip_data=[{
+                  column: {
+                      'value': str(value),
+                      'type': 'markdown'
+                  } for column, value in row.items()
+              } for row in actual.to_dict('records')],
+              tooltip_duration=None,
+              style_table={
+                  'height': '20em',
+                  'overflowY': 'auto'
+              },
               id='actual-data-table'),
           html.Button('Add Row', className='editing-rows-button', n_clicks=0)
       ])
+
+
+@app.callback(
+    Output('actual-data-table', 'tooltip_data'),
+    Input('actual-data-table', 'data'))
+def update_actual_table_tooltips(table_data):
+  actual_total = pd.DataFrame(table_data)
+  return [{
+      column: {
+          'value': str(value),
+          'type': 'markdown'
+      } for column, value in row.items()
+  } for row in actual_total.to_dict('records')]
 
 
 @app.callback([
@@ -227,7 +249,7 @@ def update_stats_panel(actual_data, budget_data):
   # out
   actual_total = pd.DataFrame(actual_data)['amount'].sum()
   return (actual_total, planned_total or
-          planned_total + 1.0, 'Planned income: {}'.format(planned_total),
+          planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
           'Already spent: {}'.format(actual_total),
           'Monthly Balance: {}'.format(planned_total - actual_total))
 
@@ -250,7 +272,7 @@ def update_budgetary_item_stats_panel(actual_data, budget_data, item):
   # Make sure that plan is not exactly zero as this causes the Guage to freak
   # out
   return (actual_total, planned_total or
-          planned_total + 1.0, 'Planned income: {}'.format(planned_total),
+          planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
           'Already spent: {}'.format(actual_total))
 
 
