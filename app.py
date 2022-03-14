@@ -2,11 +2,13 @@ import datetime
 
 import dash_daq as daq
 import pandas as pd
+import dash
 from dash import Dash, html, dcc, dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import figures as figs
+import utils
 
 app = Dash(__name__, title='Financial Planning and Monitoring')
 
@@ -161,7 +163,7 @@ def build_budget_table():
               editable=True,
               row_deletable=True,
               id='budget-data-table'),
-          html.Button('Add Row', className='editing-rows-button', n_clicks=0)
+          html.Button('Add Row', id='budget-rows-button', n_clicks=0)
       ])
 
 
@@ -210,7 +212,7 @@ def build_actual_table():
                   column: {
                       'value': str(value),
                       'type': 'markdown'
-                  } for column, value in row.items()
+                  } for column, value in row.items() if column == 'category'
               } for row in actual.to_dict('records')],
               tooltip_duration=None,
               style_table={
@@ -218,7 +220,7 @@ def build_actual_table():
                   'overflowY': 'auto'
               },
               id='actual-data-table'),
-          html.Button('Add Row', className='editing-rows-button', n_clicks=0)
+          html.Button('Add Row', id='actual-rows-button', n_clicks=0)
       ])
 
 
@@ -226,12 +228,12 @@ def build_actual_table():
     Output('actual-data-table', 'tooltip_data'),
     Input('actual-data-table', 'data'))
 def update_actual_table_tooltips(table_data):
-  actual_total = pd.DataFrame(table_data)
+  actual_total = utils.table_data_to_frame(table_data)
   return [{
       column: {
           'value': str(value),
           'type': 'markdown'
-      } for column, value in row.items()
+      } for column, value in row.items() if column != 'category'
   } for row in actual_total.to_dict('records')]
 
 
@@ -244,10 +246,10 @@ def update_actual_table_tooltips(table_data):
 ], [Input('actual-data-table', 'data'),
     Input('budget-data-table', 'data')])
 def update_stats_panel(actual_data, budget_data):
-  planned_total = pd.DataFrame(budget_data)['amounts'].sum()
+  planned_total = utils.table_data_to_frame(budget_data)['amounts'].sum()
   # Make sure that plan is not exactly zero as this causes the Guage to freak
   # out
-  actual_total = pd.DataFrame(actual_data)['amount'].sum()
+  actual_total = utils.table_data_to_frame(actual_data)['amount'].sum()
   return (actual_total, planned_total or
           planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
           'Already spent: {}'.format(actual_total),
@@ -265,8 +267,8 @@ def update_stats_panel(actual_data, budget_data):
     Input('dropdown', 'value')
 ])
 def update_budgetary_item_stats_panel(actual_data, budget_data, item):
-  budget_data = pd.DataFrame(budget_data)
-  actual_data = pd.DataFrame(actual_data)
+  budget_data = utils.table_data_to_frame(budget_data)
+  actual_data = utils.table_data_to_frame(actual_data)
   planned_total = budget_data[budget_data['items'] == item]['amounts'].sum()
   actual_total = actual_data[actual_data['category'] == item]['amount'].sum()
   # Make sure that plan is not exactly zero as this causes the Guage to freak
@@ -278,7 +280,7 @@ def update_budgetary_item_stats_panel(actual_data, budget_data, item):
 
 @app.callback(Output('piechart', 'figure'), Input('budget-data-table', 'data'))
 def update_piechart(budget_data):
-  budget_data = pd.DataFrame(budget_data)
+  budget_data = utils.table_data_to_frame(budget_data)
   return figs.piechart(budget_data['items'], budget_data['amounts'])
 
 
@@ -286,9 +288,9 @@ def update_piechart(budget_data):
     Output('plan-vs-actual-all-budgetary-items', 'figure'),
     [Input('actual-data-table', 'data'),
      Input('budget-data-table', 'data')])
-def update_timeseries(actual_data, budget_data):
-  budget_data = pd.DataFrame(budget_data)
-  actual_data = pd.DataFrame(actual_data)
+def update_budget_vs_planned(actual_data, budget_data):
+  budget_data = utils.table_data_to_frame(budget_data)
+  actual_data = utils.table_data_to_frame(actual_data)
   return figs.plan_vs_actual_fig(budget_data, actual_data)
 
 
@@ -297,9 +299,13 @@ def update_timeseries(actual_data, budget_data):
     [Input('actual-data-table', 'data'),
      Input('budget-data-table', 'data')])
 def update_timeseries(actual_data, budget_data):
-  budget_data = pd.DataFrame(budget_data)
-  actual_data = pd.DataFrame(actual_data)
-  return figs.plan_vs_actual_time_series(budget_data, actual_data)
+  budget = utils.table_data_to_frame(budget_data)
+  actual = utils.table_data_to_frame(actual_data)
+  try:
+    fig = figs.plan_vs_actual_time_series(budget, actual)
+    return fig
+  finally:
+      raise PreventUpdate
 
 
 @app.callback(
@@ -319,12 +325,31 @@ def update_cache(budget_table_data, actual_table_date, storage):
 
 @app.callback(
     [Output('budget-data-table', 'data'),
-     Output('actual-data-table', 'data')],
-    Input('local-storage', 'modified_timestamp'), State('local-storage',
-                                                        'data'))
-def on_data_set_table(ts, storage):
+     Output('actual-data-table', 'data')], [
+         Input('local-storage', 'modified_timestamp'),
+         Input('actual-rows-button', 'n_clicks'),
+         Input('budget-rows-button', 'n_clicks')
+     ], State('local-storage', 'data'), State('actual-data-table', 'data'),
+    State('actual-data-table', 'columns'), State('budget-data-table', 'data'),
+    State('budget-data-table', 'columns'))
+def on_data_set_table(ts, actual_n_clicks, budget_n_clicks, storage,
+                      actual_rows, actual_columns, budget_rows, budget_columns):
   if ts is None or storage is None:
     raise PreventUpdate
+  ctx = dash.callback_context
+  input_id = ctx.triggered[0]["prop_id"].split(".")[0]
+  if input_id == 'actual-rows-button' and actual_n_clicks > 0:
+    defaults = {'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
+                'text': 'Add description...',
+                'numeric': 0.0}
+    actual_rows.append({c['id']: defaults[c['type']] for c in actual_columns})
+    storage['actual'] = actual_rows
+  if input_id == 'budget-rows-button' and budget_n_clicks > 0:
+    defaults = {'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
+                'text': '',
+                'numeric': 0.0}
+    budget_rows.append({c['id']: defaults[c['type']] for c in budget_columns})
+    storage['budget'] = budget_rows
   return storage['budget'], storage['actual']
 
 

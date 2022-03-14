@@ -204,6 +204,10 @@ position: absolute;
   display: none !important;
 }
 
+.dash-table-tooltip p {
+    font-size: 0.9em !important;
+}
+
 
 #progress-gauge > div > div > div > div {
   color: #202729; !important;
