@@ -52,7 +52,7 @@ def build_quick_stats_panel():
                       id='numerical-stats',
                       children=[
                           html.Span(
-                              children='Already spent: {}'.format(0.0),
+                              children='Balance: {}'.format(0.0),
                               className='numerical-stat',
                               id='quick-stats-planned'),
                           html.Span(
@@ -68,7 +68,7 @@ def build_quick_stats_panel():
                       min=0.0,
                       showCurrentValue=True)
               ]),
-          html.H3('Monthly Balance: {}'.format(0.0), id='quick-stats-total'),
+          html.H3('Spare money: {}'.format(0.0), id='quick-stats-total'),
       ])
 
 
@@ -86,7 +86,7 @@ def build_budgetary_item_stats_panel():
                       id='item-numerical-stats',
                       children=[
                           html.Span(
-                              'Already spent: {}'.format(0.0),
+                              'Balance: {}'.format(0.0),
                               className='numerical-stat',
                               id='item-stats-planned'),
                           html.Span(
@@ -252,8 +252,8 @@ def update_stats_panel(actual_data, budget_data):
   actual_total = utils.table_data_to_frame(actual_data)['amount'].sum()
   return (actual_total, planned_total or
           planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
-          'Already spent: {}'.format(actual_total),
-          'Monthly Balance: {}'.format(planned_total - actual_total))
+          'Balance: {}'.format(actual_total),
+          'Spare money: {}'.format(planned_total - actual_total))
 
 
 @app.callback([
@@ -273,9 +273,9 @@ def update_budgetary_item_stats_panel(actual_data, budget_data, item):
   actual_total = actual_data[actual_data['category'] == item]['amount'].sum()
   # Make sure that plan is not exactly zero as this causes the Guage to freak
   # out
-  return (actual_total, planned_total or
-          planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
-          'Already spent: {}'.format(actual_total))
+  return (abs(actual_total), abs(planned_total) or
+          abs(planned_total) + 1.0, 'Planned amount: {}'.format(planned_total),
+          'Balance: {}'.format(actual_total))
 
 
 @app.callback(Output('piechart', 'figure'), Input('budget-data-table', 'data'))

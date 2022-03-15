@@ -21,7 +21,6 @@ def plan_vs_actual_fig(budget, actual):
       "Budget": "DeepSkyBlue",
       "Actual spendings": "#1260CC",
     },
-    text_auto='.2s',
     template="simple_white")
   fig.update_layout(xaxis_title="", yaxis_title="")
   fig.update_xaxes(tickangle=45)
