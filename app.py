@@ -305,7 +305,7 @@ def update_timeseries(actual_data, budget_data):
     fig = figs.plan_vs_actual_time_series(budget, actual)
     return fig
   except Exception:
-      raise PreventUpdate
+    raise PreventUpdate
 
 
 @app.callback(
@@ -323,15 +323,18 @@ def update_cache(budget_table_data, actual_table_date, storage):
   return data
 
 
-@app.callback(
-    [Output('budget-data-table', 'data'),
-     Output('actual-data-table', 'data')], [
-         Input('local-storage', 'modified_timestamp'),
-         Input('actual-rows-button', 'n_clicks'),
-         Input('budget-rows-button', 'n_clicks')
-     ], State('local-storage', 'data'), State('actual-data-table', 'data'),
-    State('actual-data-table', 'columns'), State('budget-data-table', 'data'),
-    State('budget-data-table', 'columns'))
+@app.callback([
+    Output('budget-data-table', 'data'),
+    Output('actual-data-table', 'data'),
+    Output('dropdown', 'options')
+], [
+    Input('local-storage', 'modified_timestamp'),
+    Input('actual-rows-button', 'n_clicks'),
+    Input('budget-rows-button', 'n_clicks')
+], State('local-storage', 'data'), State('actual-data-table', 'data'),
+              State('actual-data-table', 'columns'),
+              State('budget-data-table', 'data'),
+              State('budget-data-table', 'columns'))
 def on_data_set_table(ts, actual_n_clicks, budget_n_clicks, storage,
                       actual_rows, actual_columns, budget_rows, budget_columns):
   if ts is None or storage is None:
@@ -339,18 +342,24 @@ def on_data_set_table(ts, actual_n_clicks, budget_n_clicks, storage,
   ctx = dash.callback_context
   input_id = ctx.triggered[0]["prop_id"].split(".")[0]
   if input_id == 'actual-rows-button' and actual_n_clicks > 0:
-    defaults = {'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
-                'text': 'Add description...',
-                'numeric': 0.0}
+    defaults = {
+        'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
+        'text': 'Add description...',
+        'numeric': 0.0
+    }
     actual_rows.append({c['id']: defaults[c['type']] for c in actual_columns})
     storage['actual'] = actual_rows
   if input_id == 'budget-rows-button' and budget_n_clicks > 0:
-    defaults = {'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
-                'text': '',
-                'numeric': 0.0}
+    defaults = {
+        'datetime': datetime.datetime.today().strftime('%Y-%m-%d'),
+        'text': '',
+        'numeric': 0.0
+    }
     budget_rows.append({c['id']: defaults[c['type']] for c in budget_columns})
     storage['budget'] = budget_rows
-  return storage['budget'], storage['actual']
+  return storage['budget'], storage['actual'], [
+      row['items'] for row in budget_rows
+  ]
 
 
 app.layout = html.Div(
