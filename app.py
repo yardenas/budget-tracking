@@ -304,7 +304,7 @@ def update_timeseries(actual_data, budget_data):
   try:
     fig = figs.plan_vs_actual_time_series(budget, actual)
     return fig
-  finally:
+  except Exception:
       raise PreventUpdate
 
 
