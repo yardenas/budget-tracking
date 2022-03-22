@@ -11,6 +11,7 @@ import figures as figs
 import utils
 
 app = Dash(__name__, title='Financial Planning and Monitoring')
+server = app.server
 
 
 def init_tables():
