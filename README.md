@@ -7,4 +7,6 @@ Adding and editing new expenses or income is done similarly via the actuals tabl
 
 The tables are persistant and are saved locally (@localStorage cookies).
 
+## Online preview
+
 The dashboard can be viewed at: https://globerman.herokuapp.com/
