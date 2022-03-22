@@ -86,11 +86,11 @@ def build_budgetary_item_stats_panel():
                       id='item-numerical-stats',
                       children=[
                           html.Span(
-                              'Balance: {}'.format(0.0),
+                              'Balance: {:.2f}'.format(0.0),
                               className='numerical-stat',
                               id='item-stats-planned'),
                           html.Span(
-                              'Planned amount: {}'.format(0.0),
+                              'Planned amount: {:.2f}'.format(0.0),
                               className='numerical-stat',
                               id='item-stats-income'),
                       ]),
@@ -250,10 +250,10 @@ def update_stats_panel(actual_data, budget_data):
   # Make sure that plan is not exactly zero as this causes the Guage to freak
   # out
   actual_total = utils.table_data_to_frame(actual_data)['amount'].sum()
-  return (actual_total, planned_total or
-          planned_total + 1.0, 'Planned amount: {}'.format(planned_total),
-          'Balance: {}'.format(actual_total),
-          'Spare money: {}'.format(planned_total - actual_total))
+  return (actual_total, planned_total or planned_total + 1.0,
+          'Planned amount: {:.2f}'.format(round(planned_total, 2)),
+          'Balance: {:.2f}'.format(round(actual_total, 2)),
+          'Spare money: {:.2f}'.format(round(planned_total - actual_total, 2)))
 
 
 @app.callback([
@@ -273,9 +273,9 @@ def update_budgetary_item_stats_panel(actual_data, budget_data, item):
   actual_total = actual_data[actual_data['category'] == item]['amount'].sum()
   # Make sure that plan is not exactly zero as this causes the Guage to freak
   # out
-  return (abs(actual_total), abs(planned_total) or
-          abs(planned_total) + 1.0, 'Planned amount: {}'.format(planned_total),
-          'Balance: {}'.format(actual_total))
+  return (abs(actual_total), abs(planned_total) or abs(planned_total) + 1.0,
+          'Planned amount: {:.2f}'.format(round(planned_total, 2)),
+          'Balance: {:.2f}'.format(round(actual_total, 2)))
 
 
 @app.callback(Output('piechart', 'figure'), Input('budget-data-table', 'data'))
