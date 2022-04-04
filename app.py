@@ -327,7 +327,8 @@ def update_cache(budget_table_data, actual_table_date, storage):
 @app.callback([
     Output('budget-data-table', 'data'),
     Output('actual-data-table', 'data'),
-    Output('dropdown', 'options')
+    Output('dropdown', 'options'),
+    Output('actual-data-table', 'dropdown')
 ], [
     Input('local-storage', 'modified_timestamp'),
     Input('actual-rows-button', 'n_clicks'),
@@ -360,7 +361,14 @@ def on_data_set_table(ts, actual_n_clicks, budget_n_clicks, storage,
     storage['budget'] = budget_rows
   return storage['budget'], storage['actual'], [
       row['items'] for row in budget_rows
-  ]
+  ], {
+      'category': {
+          'options': [{
+              'label': row['items'],
+              'value': row['items']
+          } for row in budget_rows]
+      }
+  }
 
 
 app.layout = html.Div(
