@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def plan_vs_actual_fig(budget, actual):
@@ -68,12 +69,24 @@ def plan_vs_actual_time_series(budget, actual):
       height=450,
       width=425)
   fig.update_traces(line=dict(width=2.5))
+  spare_money = budget['amounts'].sum()
   fig.add_hline(
-      y=budget['amounts'].sum(),
+      y=spare_money,
       opacity=1,
       line_width=2.5,
       line_dash='dash',
       line_color='black',
       annotation_text='Budget')
-  fig.update_layout(xaxis_title="Date", yaxis_title="Money Spent")
+  fig.update_layout(xaxis_title="Date", yaxis_title="Money Spent",
+                    showlegend=False)
+  budget_overrun = actual_amounts_by_date < spare_money
+  if len(budget_overrun) > 1:
+    overrun = (spare_money - actual_amounts_by_date)[budget_overrun]
+    fig.add_trace(
+        go.Scatter(
+            x=overrun.index,
+            y=np.ones_like(overrun.index) * spare_money,
+            fill='tonexty',
+            mode='none',
+            fillcolor='#faeae9'))
   return fig
