@@ -59,10 +59,10 @@ def plan_vs_actual_time_series(budget, actual):
   actual.sort_index(inplace=True)
   # Aggregate and sum all items with the same date.
   actual_amounts_by_date = actual['amount'].groupby(
-      actual['amount'].index).sum()
+      actual['amount'].index).sum().cumsum()
   fig = px.line(
       x=actual_amounts_by_date.index,
-      y=actual_amounts_by_date.cumsum(),
+      y=actual_amounts_by_date,
       markers=True,
       template="simple_white",
       color_discrete_sequence=['DeepSkyBlue', '#004f66'],
