@@ -360,13 +360,13 @@ def on_data_set_table(ts, actual_n_clicks, budget_n_clicks, storage,
     budget_rows.append({c['id']: defaults[c['type']] for c in budget_columns})
     storage['budget'] = budget_rows
   return storage['budget'], storage['actual'], [
-      row['items'] for row in budget_rows
+      row['items'] for row in storage['budget']
   ], {
       'category': {
           'options': [{
               'label': row['items'],
               'value': row['items']
-          } for row in budget_rows]
+          } for row in storage['budget']]
       }
   }
 
