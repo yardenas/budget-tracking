@@ -254,7 +254,7 @@ def update_stats_panel(actual_data, budget_data):
   return (actual_total, planned_total or planned_total + 1.0,
           'Planned amount: {:.2f}'.format(round(planned_total, 2)),
           'Balance: {:.2f}'.format(round(actual_total, 2)),
-          'Spare money: {:.2f}'.format(round(planned_total - actual_total, 2)))
+          'Spare money: {:.2f}'.format(round(actual_total - planned_total, 2)))
 
 
 @app.callback([
